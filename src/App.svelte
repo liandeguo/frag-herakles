@@ -41,6 +41,7 @@
 	</div>
 	<div class="keyboard" style="display: {displaykeyboard_css};">
 		<button>dwdw</button>
+		<a href="/word">Hello World!</a>
 	</div>
 </main>
 
