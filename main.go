@@ -16,12 +16,14 @@ const (
 	dbname   = "frag-herakles"
 )
 
-func handleAnswer(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Answer")
+func main() {
+	rq()
 }
 
-func main() {
-
+func handleAnswer(w http.ResponseWriter, r *http.Request) {
+	fullPath := r.URL.Path
+	remainingPath := fullPath[len("/answer/"):] // Get the portion after "/answer/"
+	// Connect with Database
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -36,7 +38,34 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println("Successfully connected!")
-	http.HandleFunc("/answer", handleAnswer)
+	// Search for the word in the database
+	query := "SELECT * FROM vocabulary WHERE greek = '" + remainingPath + "'"
+	rows, err := db.Query(query)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		fmt.Println("Nichts Reihe")
+		return
+	}
+
+	var (
+		col1 interface{}
+		col2 interface{}
+	)
+
+	err = rows.Scan(&col1, &col2)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Fprint(w, col1, "	", col2)
+}
+
+func rq() {
+	http.HandleFunc("/answer/", handleAnswer)
+	fmt.Println("Server listening on Port 8080")
 	http.ListenAndServe(":8080", nil)
 }
