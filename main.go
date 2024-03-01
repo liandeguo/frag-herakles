@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -23,6 +24,9 @@ func main() {
 func handleAnswer(w http.ResponseWriter, r *http.Request) {
 	fullPath := r.URL.Path
 	remainingPath := fullPath[len("/answer/"):] // Get the portion after "/answer/"
+	remainingPath = strings.Replace(remainingPath, "-", " ", -1)
+
+	fmt.Println(remainingPath)
 	// Connect with Database
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -52,16 +56,20 @@ func handleAnswer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var (
-		col1 interface{}
-		col2 interface{}
+		german       interface{}
+		greek        interface{}
+		lektion      interface{}
+		partofspeech interface{}
+		gender       interface{}
+		inflection   interface{}
 	)
 
-	err = rows.Scan(&col1, &col2)
+	err = rows.Scan(&german, &greek, &lektion, &partofspeech, &gender, &inflection)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Fprint(w, col1, "	", col2)
+	fmt.Fprint(w, german, "|", greek, "|", lektion, "|", partofspeech, "|", gender, "|", inflection)
 }
 
 func rq() {
