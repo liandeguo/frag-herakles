@@ -23,7 +23,10 @@ func main() {
 
 func handleAnswer(w http.ResponseWriter, r *http.Request) {
 	fullPath := r.URL.Path
+	// If e.g. φίλος exists and φίλος is entered give this, if o φίλος is entered and φίλος exists still give φίλος
+	// Send a qu
 	remainingPath := fullPath[len("/answer/"):] // Get the portion after "/answer/"
+	remainingPathUncut := remainingPath
 	remainingPath = strings.Replace(remainingPath, "-", " ", -1)
 
 	fmt.Println(remainingPath)
@@ -51,7 +54,16 @@ func handleAnswer(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	if !rows.Next() {
-		fmt.Println("Nichts Reihe")
+		extendedSearchQuery := "SELECT * FROM vocabulary WHERE greek = '" + remainingPathUncut[len("-"):] + "'"
+		rows, err := db.Query(extendedSearchQuery)
+		if err != nil {
+			panic(err)
+		}
+		defer rows.Close()
+
+		if !rows.Next() {
+			fmt.Println("Nicht gefunden")
+		}
 		return
 	}
 
