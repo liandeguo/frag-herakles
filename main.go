@@ -1,5 +1,5 @@
 package main
-
+#w
 import (
 	"database/sql"
 	"fmt"
